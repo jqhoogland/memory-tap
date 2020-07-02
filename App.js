@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Text, View, StyleSheet, Dimensions, Button } from 'react-native';
+import { ScrollView, Text, View, StyleSheet, Dimensions, Button, TextInput } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker, Polyline} from 'react-native-maps';
 
@@ -21,7 +21,9 @@ export default function App() {
     const [followsUserLocation, setFollowsUserLocation] = useState(true);
     const [listToLearn, setListToLearn] = useState(LIST);
     const [markers, setMarkers] = useState([]);
-    const [currentMarker, setCurrentMarker] = useState(0);
+    const [currentMarker, setCurrentMarker] = useState(LIST[0].name);
+    const [currentMarkerIndex, setCurrentMarkerIndex] = useState(0);
+    const [textInputFocus, setTextInputFocus] = useState(false);
    
     useEffect(() => {
         (async () => {
@@ -54,15 +56,17 @@ export default function App() {
         let location = await Location.getCurrentPositionAsync();
         let newMarkers = await [...markers];
 
-        if (currentMarker < listToLearn.length) {
-            await newMarkers.push({name: listToLearn[currentMarker].name, location});
-        } else {
-            await newMarkers.push({name: `Locus ${currentMarker+1}`, location});
-        }
-
+        await newMarkers.push({name: currentMarker, location});
         setMarkers(newMarkers);
 
-        setCurrentMarker(currentMarker + 1);
+        if (currentMarkerIndex >= listToLearn.length - 1) {
+            setCurrentMarker(`Locus ${currentMarkerIndex + 2}`);
+        } else {
+            setCurrentMarker(listToLearn[currentMarkerIndex+1].name);
+        }
+
+        await setCurrentMarkerIndex(currentMarkerIndex + 1);
+
     };
     
     let text = 'Waiting..';
@@ -81,15 +85,18 @@ export default function App() {
     };
 
     return (
-            <View style={styles.container}>
-            <View>
+            <ScrollView style={styles.container}>
+            <View style={textInputFocus ? {flex: 0} : {}}>
             <MapView showsUserLocation={true}
         showsMyLocationButton={true}
         onUserLocationChange={({coordinate}) => setLocation({coords: {...coordinate}})}
         onPanDrag={() => setFollowsUserLocation(false)}
         onDoublePress={onDoublePress}
         followsUserLocation={followsUserLocation}
-        style={styles.mapStyle} >
+        style={{
+            width: Dimensions.get('window').width,
+            height: textInputFocus ? 0 : Dimensions.get('window').height/2,
+        }} >
 
         {markers.map((marker, i) => (
                 <Marker
@@ -109,29 +116,34 @@ export default function App() {
         </MapView>
         </View>
             
-        <View style={{flexDirection: "row", padding: 10}}>
+            <View style={{flexDirection: "row", padding: 10, marginTop: textInputFocus ? 50: 0 }}>
             <View style={{flex: 2, alignItems:"center"}}><Text>Previous</Text></View>
-            <View style={{flex: 2, alignItems:"center"}}><Text>List</Text></View>
+            <View style={{flex: 2, alignItems:"center"}}><Button title="List"/></View>
             <View style={{flex: 2, alignItems:"center"}}><Text>Skip</Text></View>
         </View>
 
 <View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30, marginBottom: 10}}>
-{(currentMarker >= listToLearn.length) ? 
+{(currentMarkerIndex >= listToLearn.length) ? 
 <Text style={{fontSize: 16, alignItems: "center"}}>You finished your list
 </Text> : <></>
 }
 </View>
             <View style={{marginTop: 30}}>
-            <Button title={currentMarker < listToLearn.length ? "Add locus" : "Add new locus"} onPress={addLocus}/>
+            <Button title={currentMarkerIndex < listToLearn.length ? "Add locus" : "Add new locus"} onPress={addLocus}/>
         </View>
 
 
 <View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 50}}>
-<Text style={{fontSize: 24, alignItems: "center"}}>{(currentMarker < listToLearn.length) ? listToLearn[currentMarker].name : `Locus ${currentMarker+1}`}
-</Text>
+<TextInput 
+onFocus={() => setTextInputFocus(true)}
+onEndEditing={() => setTextInputFocus(false)}
+onChangeText={setCurrentMarker}
+style={{fontSize: 24, alignItems: "center"}} 
+value={currentMarker}
+/>
 </View>
 
-        </View>
+        </ScrollView>
     );
 }
 
@@ -139,10 +151,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    mapStyle: {
-        width: Dimensions.get('window').width,
-        height: Dimensions.get('window').height/2,
-    },
+    
 });
 
 
