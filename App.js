@@ -53,12 +53,16 @@ export default function App() {
     const addLocus = async () => {
         let location = await Location.getCurrentPositionAsync();
         let newMarkers = await [...markers];
-        await newMarkers.push({name: listToLearn[currentMarker].name, location});
 
-        if (currentMarker < listToLearn.length - 1) {
-            setCurrentMarker(currentMarker + 1);
+        if (currentMarker < listToLearn.length) {
+            await newMarkers.push({name: listToLearn[currentMarker].name, location});
+        } else {
+            await newMarkers.push({name: `Locus ${currentMarker+1}`, location});
         }
+
         setMarkers(newMarkers);
+
+        setCurrentMarker(currentMarker + 1);
     };
     
     let text = 'Waiting..';
@@ -103,17 +107,30 @@ export default function App() {
 	strokeWidth={6}
 	    />
         </MapView>
-            
         </View>
-            <View style={{flexDirection: "row", padding: 10}}>
+            
+        <View style={{flexDirection: "row", padding: 10}}>
             <View style={{flex: 2, alignItems:"center"}}><Text>Previous</Text></View>
-            <View style={{flex: 2, alignItems:"center"}}><Text>{listToLearn[currentMarker].name}</Text></View>
+            <View style={{flex: 2, alignItems:"center"}}><Text>List</Text></View>
             <View style={{flex: 2, alignItems:"center"}}><Text>Skip</Text></View>
         </View>
 
-            <View>
-            <Button title="Add locus" onPress={addLocus}/>
+<View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30, marginBottom: 10}}>
+{(currentMarker >= listToLearn.length) ? 
+<Text style={{fontSize: 16, alignItems: "center"}}>You finished your list
+</Text> : <></>
+}
+</View>
+            <View style={{marginTop: 30}}>
+            <Button title={currentMarker < listToLearn.length ? "Add locus" : "Add new locus"} onPress={addLocus}/>
         </View>
+
+
+<View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 50}}>
+<Text style={{fontSize: 24, alignItems: "center"}}>{(currentMarker < listToLearn.length) ? listToLearn[currentMarker].name : `Locus ${currentMarker+1}`}
+</Text>
+</View>
+
         </View>
     );
 }
