@@ -10,19 +10,18 @@ import {
 
 import { Input } from "react-native-elements";
 
-function Item({ id, value, editItem, isFocused, pressEnter }) {
+function Item({ id, value, editItem, isFocused, pressEnter, style }) {
   const [ref, setRef] = useState(null);
 
   useEffect(() => {
     if (isFocused && ref) {
       ref.focus();
     }
-
-    console.log(ref);
   }, [ref]);
 
   return (
     <Input
+      style={style}
       ref={(ref) => setRef(ref)}
       value={value}
       onChangeText={(val) => editItem(id, val)}
@@ -39,7 +38,6 @@ export default function HomeScreen() {
   const editItem = (i, value) => {
     let newItems = [...items];
     newItems[i] = value;
-    console.log(i, value, items, newItems);
     setItems(newItems);
   };
 
@@ -48,10 +46,21 @@ export default function HomeScreen() {
   const newItem = () => {
     setItems([...items, ""]);
     selectItem(items.length - 1);
+    setFocused(items.length - 1);
+  };
+
+  const removeItem = (i) => {
+    let newItems = [...items];
+    newItems.splice(i, 1);
+    console.log(items, newItems);
+    setItems(newItems);
   };
 
   const pressEnter = (i) => {
-    if (i < items.length - 1) {
+    if (items[i] === "") {
+      removeItem(i);
+      setFocused(-1);
+    } else if (i < items.length - 1) {
       setFocused(i + 1);
     } else {
       newItem();

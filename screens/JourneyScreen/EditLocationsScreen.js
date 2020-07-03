@@ -8,6 +8,9 @@ import {
   Button,
   TextInput,
   Alert,
+  Modal,
+  TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
@@ -28,6 +31,14 @@ const LIST = [
 const initMarkers = (list) =>
   list.map(({ name }) => ({ name, location: null }));
 
+function Item({ id, title, onPress }) {
+  return (
+    <TouchableOpacity onPress={() => onPress(id)} style={[styles.item]}>
+      <Text style={styles.title}>{title}</Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function EditJourneyScreen() {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -37,6 +48,7 @@ export default function EditJourneyScreen() {
   const [currentMarker, setCurrentMarker] = useState(LIST[0].name);
   const [currentMarkerIndex, setCurrentMarkerIndex] = useState(0);
   const [textInputFocus, setTextInputFocus] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -66,6 +78,7 @@ export default function EditJourneyScreen() {
   };
 
   const moveTo = async (i) => {
+    setShowListModal(false);
     if (i >= markers.length) {
       setCurrentMarker(`Locus ${i + 1}`);
     } else {
@@ -74,6 +87,8 @@ export default function EditJourneyScreen() {
 
     setCurrentMarkerIndex(i);
   };
+  const nextLocus = async () => moveTo(currentMarkerIndex + 1);
+  const backLocus = async () => moveTo(currentMarkerIndex - 1);
 
   const updateLocusName = async (value) => {
     if (currentMarkerIndex < markers.length) {
@@ -100,10 +115,6 @@ export default function EditJourneyScreen() {
 
     moveTo(currentMarkerIndex + 1);
   };
-
-  const nextLocus = async () => moveTo(currentMarkerIndex + 1);
-
-  const backLocus = async () => moveTo(currentMarkerIndex - 1);
 
   const insert = async (i) => {
     let location = await Location.getCurrentPositionAsync();
@@ -154,6 +165,8 @@ export default function EditJourneyScreen() {
     setMarkers(newMarkers);
   };
 
+  const showList = () => setShowListModal(true);
+
   let text = "Waiting..";
   let latlng = { latitude: 0, longitude: 0 };
   if (errorMsg) {
@@ -168,6 +181,28 @@ export default function EditJourneyScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      <Modal animationType={"slide"} transparent={true} visible={showListModal}>
+        <View style={styles.modal}>
+          <FlatList
+            data={markers}
+            renderItem={({ item, index }) => (
+              <Item
+                id={index}
+                title={item.name}
+                onPress={() => moveTo(index)}
+              />
+            )}
+            onPress={() => {}}
+          />
+
+          <Button
+            title="Close"
+            onPress={() => {
+              setShowListModal(false);
+            }}
+          />
+        </View>
+      </Modal>
       <View style={textInputFocus ? { flex: 0 } : {}}>
         <MapView
           showsUserLocation={true}
@@ -222,7 +257,7 @@ export default function EditJourneyScreen() {
           )}
         </View>
         <View style={{ flex: 2, alignItems: "center" }}>
-          <Button title="List-view" />
+          <Button title="List" onPress={showList} />
         </View>
         <View style={{ flex: 2, alignItems: "center" }}>
           {currentMarkerIndex < markers.length ? (
@@ -308,5 +343,20 @@ export default function EditJourneyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  item: {
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+  },
+  modal: {
+    alignItems: "center",
+    backgroundColor: "white",
+    opacity: 0.9,
+    padding: 10,
+    paddingTop: 80,
+    width: Dimensions.get("window").width,
+    height: Dimensions.get("window").height * 1,
   },
 });
