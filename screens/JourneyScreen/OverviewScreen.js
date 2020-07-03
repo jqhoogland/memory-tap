@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { connect } from "react-redux";
 import {
   ScrollView,
   Text,
@@ -13,8 +14,9 @@ import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Input } from "react-native-elements";
 
+import { newJourney } from "../../store/actions";
+
 const MARKERS = require("./demo.json");
-console.log("markers", MARKERS);
 
 const getInitRegion = (markers) => {
   const markersLocated = markers.filter(
@@ -49,10 +51,15 @@ const getInitRegion = (markers) => {
   };
 };
 
-export default function EditJourneyScreen({ navigation }) {
+function OverviewScreen({ journeys, setJourneyTitle, navigation, route }) {
   const [title, setTitle] = useState("Journey Title");
   const [markers, setMarkers] = useState([]); //MARKERS);
 
+  const { journeyId } = route.params
+    ? route.params
+    : { journeyId: journeys.length - 1 };
+
+  let journey = journeys.find((journey) => journey.id === journeyId);
   let isEmpty = markers.length === 0;
   let initRegion = isEmpty ? {} : getInitRegion(markers);
 
@@ -82,7 +89,11 @@ export default function EditJourneyScreen({ navigation }) {
         </MapView>
       </View>
       <View style={{ padding: 20 }}>
-        <Input label="Journey title" value={title} onChangeText={setTitle} />
+        <Input
+          label="Journey title"
+          value={journey.name}
+          onChangeText={setTitle}
+        />
 
         <Button
           title={isEmpty ? "Add Information" : "Edit Information"}
@@ -97,6 +108,16 @@ export default function EditJourneyScreen({ navigation }) {
     </ScrollView>
   );
 }
+
+const mapStateToProps = (state) => ({
+  journeys: state.journeys,
+});
+
+const mapDispatchToProps = {
+  newJourney,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(OverviewScreen);
 
 const styles = StyleSheet.create({
   container: {

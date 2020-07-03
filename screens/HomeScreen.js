@@ -1,4 +1,6 @@
 import * as React from "react";
+
+import { connect } from "react-redux";
 import {
   Text,
   View,
@@ -8,10 +10,7 @@ import {
   Button,
 } from "react-native";
 
-const journeys = [
-  { name: "home", id: 0, loci: [] },
-  { name: "work", id: 1, loci: [] },
-];
+import { newJourney } from "../store/actions";
 
 function Item({ id, title, onPress }) {
   return (
@@ -21,27 +20,46 @@ function Item({ id, title, onPress }) {
   );
 }
 
-export default function HomeScreen() {
-  const newJourney = () => {};
+const HomeScreen = ({ journeys, newJourney, navigation }) => {
+  const createJourney = () => {
+    newJourney();
+    navigation.navigate("Journey", { journeyId: journeys.length });
+  };
 
+  console.log(journeys);
   return (
     <View style={styles.container}>
       <FlatList
         data={journeys}
         renderItem={({ item }) => (
-          <Item id={item.id} title={item.name} onPress={() => {}} />
+          <Item
+            id={item.id}
+            title={item.name}
+            onPress={() =>
+              navigation.navigate("Journey", { journeyId: item.id })
+            }
+          />
         )}
         keyExtractor={(item) => item.id}
       />
       <View style={{ margin: 20 }}>
-        <Button title="New Journey" onPress={newJourney} />
+        <Button title="New Journey" onPress={createJourney} />
       </View>
     </View>
   );
-}
+};
+
+const mapStateToProps = (state) => ({
+  journeys: state.journeys,
+});
+
+const mapDispatchToProps = {
+  newJourney,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
 
 const Constants = { statusBarHeight: 50 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
