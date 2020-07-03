@@ -54,6 +54,17 @@ export default function App() {
         }
     };
 
+    const moveTo = async(i) => {
+        if (i >= markers.length) {
+            setCurrentMarker(`Locus ${i+1}`);
+        } else {
+            setCurrentMarker(markers[i].name);
+        }
+
+        setCurrentMarkerIndex(i);
+        
+    };
+
     const addLocus = async () => {
         let location = await Location.getCurrentPositionAsync();
         let newMarkers = await [...markers];
@@ -65,37 +76,30 @@ export default function App() {
         newMarkers[currentMarkerIndex].name = currentMarker;
         newMarkers[currentMarkerIndex].location = location;
         
-        setMarkers(newMarkers);
+        await setMarkers(newMarkers);
 
-        if (currentMarkerIndex >= listToLearn.length - 1) {
-            setCurrentMarker(`Locus ${currentMarkerIndex + 2}`);
-        } else {
-            setCurrentMarker(listToLearn[currentMarkerIndex+1].name);
-        }
-
-        setCurrentMarkerIndex(currentMarkerIndex + 1);
+        moveTo(currentMarkerIndex + 1);
     };
 
-    const skipLocus = async() => {
-        if (currentMarkerIndex >= listToLearn.length - 1) {
-            setCurrentMarker(`Locus ${currentMarkerIndex + 2}`);
-        } else {
-            setCurrentMarker(markers[currentMarkerIndex+1].name);
-        }
+    const nextLocus = async() => moveTo(currentMarkerIndex + 1);
 
-        setCurrentMarkerIndex(currentMarkerIndex + 1);
+    const backLocus = async() => moveTo(currentMarkerIndex - 1);
+
+    const insert = async (i) => {
+        let location = await Location.getCurrentPositionAsync();
+        let newMarkers = await [...markers];
+        const name =  `Locus ${i+1}`;
+        newMarkers.splice(i, 0, {name, location});
+        await setMarkers(newMarkers);
+
+        setCurrentMarker(name);
+        setCurrentMarkerIndex(i);
     };
 
-    const backLocus = async() => {
-        if (currentMarkerIndex >= listToLearn.length) {
-            setCurrentMarker(`Locus ${currentMarkerIndex}`);
-        } else {
-            setCurrentMarker(markers[currentMarkerIndex-1].name);
-        }
+    const insertBefore = async() =>  insert(currentMarkerIndex);
 
-        setCurrentMarkerIndex(currentMarkerIndex - 1);
-    }
-    
+    const insertAfter = async() => insert(currentMarkerIndex+1);
+       
     let text = 'Waiting..';
     let latlng = {latitude: 0, longitude: 0};
     if (errorMsg) {
@@ -104,6 +108,8 @@ export default function App() {
         text = JSON.stringify(location);
         latlng = getLatLng(location.coords);
     }
+
+    let isLocated = (markers[currentMarkerIndex].location !== null);
 
     const dragMarker = (coordinate, i) => {
         let newMarkers = [...markers];
@@ -152,8 +158,8 @@ export default function App() {
                                                                                    ): (<></>)}
                                                           </View>
             <View style={{flex: 2, alignItems:"center"}}><Button title="List"/></View>
-            <View style={{flex: 2, alignItems:"center"}}>{currentMarkerIndex < listToLearn.length ? (
-                    <Button title={markers[currentMarkerIndex].location === null ? "Skip" : "Next"} onPress={skipLocus}/>
+            <View style={{flex: 2, alignItems:"center"}}>{currentMarkerIndex < markers.length ? (
+                    <Button title={isLocated ? "Next" : "Skip"} onPress={nextLocus}/>
             ):(
                 <></>
             )}
@@ -161,13 +167,13 @@ export default function App() {
         </View>
 
 <View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30, marginBottom: 10}}>
-{(currentMarkerIndex >= listToLearn.length) ? 
+{(currentMarkerIndex >= markers.length) ? 
 <Text style={{fontSize: 16, alignItems: "center"}}>You finished your list
 </Text> : <></>
 }
 </View>
-            <View style={{marginTop: 30}}>
-            <Button title={currentMarkerIndex < listToLearn.length ? markers[currentMarkerIndex].location === null ? "Add locus" : "Update locus" : "Add new locus"} onPress={addLocus}/>
+            <View style={{marginTop: 10}}>
+            <Button title={currentMarkerIndex < markers.length ? isLocated ? "Update locus" : "Add locus" : "Add new locus"} onPress={addLocus}/>
         </View>
 
 
@@ -181,6 +187,19 @@ value={currentMarker}
 />
 </View>
 
+{ isLocated ? (
+<View style={{flexDirection: "row", paddingTop: 20}}>
+<View style={{flex: 3}}>
+<Button title="Insert Before" onPress={insertBefore}/>
+</View>
+<View style={{flex: 3}}>
+<Button title="Insert After" onPress={insertAfter}/>
+</View>
+</View>
+    ): (
+<></>
+)}            
+
         </ScrollView>
     );
 }
@@ -191,6 +210,9 @@ const styles = StyleSheet.create({
     },
     
 });
+
+
+
 
 
 
