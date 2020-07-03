@@ -23,10 +23,12 @@ function Item({ id, title, onPress }) {
 const HomeScreen = ({ journeys, newJourney, navigation }) => {
   const createJourney = () => {
     newJourney();
-    navigation.navigate("Journey", { journeyId: journeys.length });
+    navigation.navigate("Journey", {
+      screen: "Overview",
+      params: { journeyId: journeys.length },
+    });
   };
 
-  console.log(journeys);
   return (
     <View style={styles.container}>
       <FlatList
@@ -36,7 +38,10 @@ const HomeScreen = ({ journeys, newJourney, navigation }) => {
             id={item.id}
             title={item.name}
             onPress={() =>
-              navigation.navigate("Journey", { journeyId: item.id })
+              navigation.navigate("Journey", {
+                screen: "Overview",
+                params: { journeyId: item.id },
+              })
             }
           />
         )}

@@ -14,7 +14,7 @@ import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Input } from "react-native-elements";
 
-import { newJourney } from "../../store/actions";
+import { updateJourneyName } from "../../store/actions";
 
 const MARKERS = require("./demo.json");
 
@@ -51,15 +51,19 @@ const getInitRegion = (markers) => {
   };
 };
 
-function OverviewScreen({ journeys, setJourneyTitle, navigation, route }) {
-  const [title, setTitle] = useState("Journey Title");
+function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
+  const [journey, setJourney] = useState({});
   const [markers, setMarkers] = useState([]); //MARKERS);
 
   const { journeyId } = route.params
     ? route.params
     : { journeyId: journeys.length - 1 };
 
-  let journey = journeys.find((journey) => journey.id === journeyId);
+  useEffect(() => {
+    console.log(route.params, journeyId, journeys.length);
+    setJourney(journeys.find((journey) => journey.id === journeyId));
+  }, [journeys, route]);
+
   let isEmpty = markers.length === 0;
   let initRegion = isEmpty ? {} : getInitRegion(markers);
 
@@ -92,7 +96,7 @@ function OverviewScreen({ journeys, setJourneyTitle, navigation, route }) {
         <Input
           label="Journey title"
           value={journey.name}
-          onChangeText={setTitle}
+          onChangeText={(value) => updateJourneyName(value, journey.id)}
         />
 
         <Button
@@ -114,7 +118,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = {
-  newJourney,
+  updateJourneyName,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewScreen);
