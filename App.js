@@ -15,12 +15,14 @@ const LIST = [
     {name: "Phanterozoic Eon"}
 ];
 
+const initMarkers = (list) => list.map(({name}) => ({name, location: null}));
+
 export default function App() {
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [followsUserLocation, setFollowsUserLocation] = useState(true);
     const [listToLearn, setListToLearn] = useState(LIST);
-    const [markers, setMarkers] = useState([]);
+    const [markers, setMarkers] = useState(initMarkers(LIST));
     const [currentMarker, setCurrentMarker] = useState(LIST[0].name);
     const [currentMarkerIndex, setCurrentMarkerIndex] = useState(0);
     const [textInputFocus, setTextInputFocus] = useState(false);
@@ -56,7 +58,9 @@ export default function App() {
         let location = await Location.getCurrentPositionAsync();
         let newMarkers = await [...markers];
 
-        await newMarkers.push({name: currentMarker, location});
+        newMarkers[currentMarkerIndex].name = currentMarker;
+        newMarkers[currentMarkerIndex].location = location;
+        
         setMarkers(newMarkers);
 
         if (currentMarkerIndex >= listToLearn.length - 1) {
@@ -65,23 +69,27 @@ export default function App() {
             setCurrentMarker(listToLearn[currentMarkerIndex+1].name);
         }
 
-        await setCurrentMarkerIndex(currentMarkerIndex + 1);
+        setCurrentMarkerIndex(currentMarkerIndex + 1);
     };
 
     const skipLocus = async() => {
-        let newMarkers = await [...markers];
-
-        await newMarkers.push({name: currentMarker, location: null});
-        setMarkers(newMarkers);
-
         if (currentMarkerIndex >= listToLearn.length - 1) {
             setCurrentMarker(`Locus ${currentMarkerIndex + 2}`);
         } else {
-            setCurrentMarker(listToLearn[currentMarkerIndex+1].name);
+            setCurrentMarker(markers[currentMarkerIndex+1].name);
         }
 
-        await setCurrentMarkerIndex(currentMarkerIndex + 1);
-        
+        setCurrentMarkerIndex(currentMarkerIndex + 1);
+    };
+
+    const backLocus = async() => {
+        if (currentMarkerIndex >= listToLearn.length) {
+            setCurrentMarker(`Locus ${currentMarkerIndex}`);
+        } else {
+            setCurrentMarker(markers[currentMarkerIndex-1].name);
+        }
+
+        setCurrentMarkerIndex(currentMarkerIndex - 1);
     }
     
     let text = 'Waiting..';
@@ -135,7 +143,9 @@ export default function App() {
         </View>
             
             <View style={{flexDirection: "row", padding: 10, marginTop: textInputFocus ? 50: 0 }}>
-            <View style={{flex: 2, alignItems:"center"}}><Text>Previous</Text></View>
+            <View style={{flex: 2, alignItems:"center"}}>{currentMarkerIndex > 0 ? (<Button title="Previous" onPress={backLocus}/>
+                                                                                   ): (<></>)}
+                                                          </View>
             <View style={{flex: 2, alignItems:"center"}}><Button title="List"/></View>
             <View style={{flex: 2, alignItems:"center"}}><Button title="Skip" onPress={skipLocus}/></View>
         </View>
@@ -147,7 +157,7 @@ export default function App() {
 }
 </View>
             <View style={{marginTop: 30}}>
-            <Button title={currentMarkerIndex < listToLearn.length ? "Add locus" : "Add new locus"} onPress={addLocus}/>
+            <Button title={currentMarkerIndex < listToLearn.length ? markers[currentMarkerIndex].location === null ? "Add locus" : "Update locus" : "Add new locus"} onPress={addLocus}/>
         </View>
 
 
