@@ -52,7 +52,11 @@ const getInitRegion = (markers) => {
 };
 
 function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
-  const [journey, setJourney] = useState({});
+  const [journey, setJourney] = useState({
+    name: "",
+    id: journeys.length - 1,
+    locations: [],
+  });
 
   const { journeyId } = route.params
     ? route.params
