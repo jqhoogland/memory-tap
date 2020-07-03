@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, Text, View, StyleSheet, Dimensions, Button, TextInput } from 'react-native';
+import { ScrollView, Text, View, StyleSheet, Dimensions, Button, TextInput, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker, Polyline} from 'react-native-maps';
 
@@ -105,10 +105,36 @@ export default function App() {
         setCurrentMarker(name);
         setCurrentMarkerIndex(i);
     };
-
     const insertBefore = async() =>  insert(currentMarkerIndex);
-
     const insertAfter = async() => insert(currentMarkerIndex+1);
+
+    const deleteLocus = () => {
+        let newMarkers = [...markers];
+        newMarkers.splice(currentMarkerIndex, 1);
+        setMarkers(newMarkers);
+
+        if (currentMarkerIndex >= newMarkers.length) {
+            setCurrentMarkerIndex(newMarkers.length);
+            setCurrentMarker(`Locus ${currentMarkerIndex}`);
+        } else {
+            setCurrentMarker(newMarkers[currentMarkerIndex].name);
+        }
+        
+    };
+    const deleteLocusAlert = async() => {
+        Alert.alert(
+            'Delete Locus',
+            `Are you sure you want to delete locus '${currentMarker}'`,
+            [
+                {
+                    text: 'Cancel',
+                    onPress: () => console.log('Cancel Pressed'),
+                    style: 'cancel'
+                },
+                { text: 'Delete', onPress: deleteLocus}
+            ]
+        );
+    }
        
     let text = 'Waiting..';
     let latlng = {latitude: 0, longitude: 0};
@@ -118,8 +144,9 @@ export default function App() {
         text = JSON.stringify(location);
         latlng = getLatLng(location.coords);
     }
-
-    let isLocated = (currentMarkerIndex < markers.length && markers[currentMarkerIndex].location !== null);
+    let isBeforeEndOfList = (currentMarkerIndex < markers.length);
+    let isLocated = (isBeforeEndOfList && markers[currentMarkerIndex].location !== null);
+    
 
     const dragMarker = (coordinate, i) => {
         let newMarkers = [...markers];
@@ -177,7 +204,7 @@ export default function App() {
                                                           </View>
         </View>
 
-<View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30, marginBottom: 10}}>
+<View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 10, marginBottom: 10}}>
 {(currentMarkerIndex >= markers.length) ? 
 <Text style={{fontSize: 16, alignItems: "center"}}>You finished your list
 </Text> : <></>
@@ -188,7 +215,7 @@ export default function App() {
         </View>
 
 
-<View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 50}}>
+<View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30}}>
 <TextInput 
 onFocus={() => setTextInputFocus(true)}
 onEndEditing={() => setTextInputFocus(false)}
@@ -210,7 +237,12 @@ value={currentMarker}
     ): (
 <></>
 )}            
-
+{ isBeforeEndOfList ?
+(
+<Button style={{marginTop:30}} title="Delete" onPress={deleteLocusAlert}/>
+) : (
+<></>
+)}
         </ScrollView>
     );
 }
