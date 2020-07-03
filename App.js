@@ -58,6 +58,10 @@ export default function App() {
         let location = await Location.getCurrentPositionAsync();
         let newMarkers = await [...markers];
 
+        if (currentMarkerIndex === markers.length) {
+            await newMarkers.push({name: null, location: null});
+        }
+
         newMarkers[currentMarkerIndex].name = currentMarker;
         newMarkers[currentMarkerIndex].location = location;
         
@@ -123,7 +127,7 @@ export default function App() {
 
         {markers.map((marker, i) => (marker.location ? 
                                      (<Marker
-                                      pinColor={i === currentMarkerIndex ? "red" : "grey"}
+                                      pinColor={i === currentMarkerIndex ? "red" : "#ff9999"}
             key={`key${i}`}
             coordinate={marker.location.coords}
             title={marker.name}
