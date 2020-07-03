@@ -147,7 +147,8 @@ export default function App() {
             key={`key${i}`}
             coordinate={marker.location.coords}
             title={marker.name}
-            onDrag={e => dragMarker(e.nativeEvent.coordinate, i)}
+                                      onDrag={e => dragMarker(e.nativeEvent.coordinate, i)}
+                                      onPress={() => moveTo(i)}
             draggable
                                       />
                                      ) : (
