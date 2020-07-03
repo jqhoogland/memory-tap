@@ -3,7 +3,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 
 import OverviewScreen from "./OverviewScreen";
-import EditJourneyScreen from "./EditJourneyScreen";
+import EditLocationsScreen from "./EditLocationsScreen";
+import EditInformationScreen from "./EditInformationScreen";
 
 const Stack = createStackNavigator();
 
@@ -11,7 +12,8 @@ export default function JourneyScreen() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Overview" component={OverviewScreen} />
-      <Stack.Screen name="Edit" component={EditJourneyScreen} />
+      <Stack.Screen name="Edit Locations" component={EditLocationsScreen} />
+      <Stack.Screen name="Edit Information" component={EditInformationScreen} />
     </Stack.Navigator>
   );
 }

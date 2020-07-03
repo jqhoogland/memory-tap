@@ -49,19 +49,18 @@ const getInitRegion = (markers) => {
   };
 };
 
-export default function EditJourneyScreen() {
+export default function EditJourneyScreen({ navigation }) {
   const [title, setTitle] = useState("Journey Title");
-  const [markers, setMarkers] = useState(MARKERS);
+  const [markers, setMarkers] = useState([]); //MARKERS);
 
-  let initRegion = getInitRegion(markers);
+  let isEmpty = markers.length === 0;
+  let initRegion = isEmpty ? {} : getInitRegion(markers);
 
   return (
     <ScrollView style={styles.container}>
       <View>
         <MapView
-          initialRegion={initRegion}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
+          initRegion={initRegion}
           style={{
             width: Dimensions.get("window").width,
             height: Dimensions.get("window").height / 3,
@@ -84,6 +83,16 @@ export default function EditJourneyScreen() {
       </View>
       <View style={{ padding: 20 }}>
         <Input label="Journey title" value={title} onChangeText={setTitle} />
+
+        <Button
+          title={isEmpty ? "Add Information" : "Edit Information"}
+          onPress={() => navigation.navigate("Edit Information")}
+        />
+
+        <Button
+          title={isEmpty ? "Add Locations" : "Edit Locations"}
+          onPress={() => navigation.navigate("Edit Locations")}
+        />
       </View>
     </ScrollView>
   );
