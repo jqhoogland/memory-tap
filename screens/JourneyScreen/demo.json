@@ -5,7 +5,7 @@
       "coords": {
         "altitude": -2.672480344772339,
         "altitudeAccuracy": 10,
-        "latitude": 52.43851262165116,
+        "latitude": 52.3851262165116,
         "accuracy": 65,
         "longitude": 4.8720274457968715,
         "heading": -1,
@@ -52,7 +52,7 @@
         "altitudeAccuracy": 10,
         "latitude": 52.38380378674024,
         "accuracy": 65,
-        "longitude": 4.952042905951591,
+        "longitude": 4.873042905951591,
         "heading": -1,
         "speed": -1
       },

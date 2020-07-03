@@ -6,12 +6,12 @@ import {
   StyleSheet,
   Dimensions,
   Button,
-  TextInput,
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
+import { Input } from "react-native-elements";
 
 const MARKERS = require("./demo.json");
 console.log("markers", MARKERS);
@@ -50,6 +50,7 @@ const getInitRegion = (markers) => {
 };
 
 export default function EditJourneyScreen() {
+  const [title, setTitle] = useState("Journey Title");
   const [markers, setMarkers] = useState(MARKERS);
 
   let initRegion = getInitRegion(markers);
@@ -68,11 +69,7 @@ export default function EditJourneyScreen() {
         >
           {markers.map((marker, i) =>
             marker.location ? (
-              <Marker
-                key={`key${i}`}
-                coordinate={marker.location.coords}
-                draggable
-              />
+              <Marker key={`key${i}`} coordinate={marker.location.coords} />
             ) : (
               <></>
             )
@@ -85,6 +82,9 @@ export default function EditJourneyScreen() {
           />
         </MapView>
       </View>
+      <View style={{ padding: 20 }}>
+        <Input label="Journey title" value={title} onChangeText={setTitle} />
+      </View>
     </ScrollView>
   );
 }
@@ -92,5 +92,6 @@ export default function EditJourneyScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "white",
   },
 });
