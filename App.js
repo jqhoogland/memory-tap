@@ -65,9 +65,13 @@ export default function App() {
     };
 
     const updateLocusName = async(value) => {
-        let newMarkers = [...markers];
-        newMarkers[currentMarkerIndex].name = value;
-        setMarkers(newMarkers);
+
+        if (currentMarkerIndex < markers.length) {
+            let newMarkers = [...markers];
+            newMarkers[currentMarkerIndex].name = value;
+            setMarkers(newMarkers);
+        }
+        
         setCurrentMarker(value);
     }
 
@@ -115,7 +119,7 @@ export default function App() {
         latlng = getLatLng(location.coords);
     }
 
-    let isLocated = (markers[currentMarkerIndex].location !== null);
+    let isLocated = (currentMarkerIndex < markers.length && markers[currentMarkerIndex].location !== null);
 
     const dragMarker = (coordinate, i) => {
         let newMarkers = [...markers];
