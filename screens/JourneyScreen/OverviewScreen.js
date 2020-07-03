@@ -53,7 +53,6 @@ const getInitRegion = (markers) => {
 
 function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
   const [journey, setJourney] = useState({});
-  const [markers, setMarkers] = useState([]); //MARKERS);
 
   const { journeyId } = route.params
     ? route.params
@@ -64,8 +63,8 @@ function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
     setJourney(journeys.find((journey) => journey.id === journeyId));
   }, [journeys, route]);
 
-  let isEmpty = markers.length === 0;
-  let initRegion = isEmpty ? {} : getInitRegion(markers);
+  let isEmpty = journey.locations.length === 0;
+  let initRegion = isEmpty ? {} : getInitRegion(journey.locations);
 
   return (
     <ScrollView style={styles.container}>
@@ -77,7 +76,7 @@ function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
             height: Dimensions.get("window").height / 3,
           }}
         >
-          {markers.map((marker, i) =>
+          {journey.locations.map((marker, i) =>
             marker.location ? (
               <Marker key={`key${i}`} coordinate={marker.location.coords} />
             ) : (
@@ -85,9 +84,9 @@ function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
             )
           )}
           <Polyline
-            coordinates={markers
-              .filter((markers) => markers.location)
-              .map((markers) => markers.location.coords)}
+            coordinates={journey.locations
+              .filter((marker) => marker.location)
+              .map((marker) => marker.location.coords)}
             strokeWidth={6}
           />
         </MapView>
