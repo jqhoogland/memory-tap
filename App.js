@@ -61,9 +61,15 @@ export default function App() {
             setCurrentMarker(markers[i].name);
         }
 
-        setCurrentMarkerIndex(i);
-        
+        setCurrentMarkerIndex(i);        
     };
+
+    const updateLocusName = async(value) => {
+        let newMarkers = [...markers];
+        newMarkers[currentMarkerIndex].name = value;
+        setMarkers(newMarkers);
+        setCurrentMarker(value);
+    }
 
     const addLocus = async () => {
         let location = await Location.getCurrentPositionAsync();
@@ -181,7 +187,7 @@ export default function App() {
 <TextInput 
 onFocus={() => setTextInputFocus(true)}
 onEndEditing={() => setTextInputFocus(false)}
-onChangeText={setCurrentMarker}
+onChangeText={updateLocusName}
 style={{fontSize: 24, alignItems: "center"}} 
 value={currentMarker}
 />
