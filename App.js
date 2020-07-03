@@ -123,6 +123,7 @@ export default function App() {
 
         {markers.map((marker, i) => (marker.location ? 
                                      (<Marker
+                                      pinColor={i === currentMarkerIndex ? "red" : "grey"}
             key={`key${i}`}
             coordinate={marker.location.coords}
             title={marker.name}
@@ -147,7 +148,12 @@ export default function App() {
                                                                                    ): (<></>)}
                                                           </View>
             <View style={{flex: 2, alignItems:"center"}}><Button title="List"/></View>
-            <View style={{flex: 2, alignItems:"center"}}><Button title="Skip" onPress={skipLocus}/></View>
+            <View style={{flex: 2, alignItems:"center"}}>{currentMarkerIndex < listToLearn.length ? (
+                    <Button title={markers[currentMarkerIndex].location === null ? "Skip" : "Next"} onPress={skipLocus}/>
+            ):(
+                <></>
+            )}
+                                                          </View>
         </View>
 
 <View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30, marginBottom: 10}}>
