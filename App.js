@@ -66,8 +66,23 @@ export default function App() {
         }
 
         await setCurrentMarkerIndex(currentMarkerIndex + 1);
-
     };
+
+    const skipLocus = async() => {
+        let newMarkers = await [...markers];
+
+        await newMarkers.push({name: currentMarker, location: null});
+        setMarkers(newMarkers);
+
+        if (currentMarkerIndex >= listToLearn.length - 1) {
+            setCurrentMarker(`Locus ${currentMarkerIndex + 2}`);
+        } else {
+            setCurrentMarker(listToLearn[currentMarkerIndex+1].name);
+        }
+
+        await setCurrentMarkerIndex(currentMarkerIndex + 1);
+        
+    }
     
     let text = 'Waiting..';
     let latlng = {latitude: 0, longitude: 0};
@@ -98,17 +113,20 @@ export default function App() {
             height: textInputFocus ? 0 : Dimensions.get('window').height/2,
         }} >
 
-        {markers.map((marker, i) => (
-                <Marker
+        {markers.map((marker, i) => (marker.location ? 
+                                     (<Marker
             key={`key${i}`}
             coordinate={marker.location.coords}
             title={marker.name}
             onDrag={e => dragMarker(e.nativeEvent.coordinate, i)}
             draggable
-                />
+                                      />
+                                     ) : (
+                                     <></>)
+                                     
         ))}
             <Polyline
-	coordinates={markers.map(markers => markers.location.coords)
+	coordinates={markers.filter(markers => markers.location).map(markers => markers.location.coords)
 	}
 
 	strokeWidth={6}
@@ -119,7 +137,7 @@ export default function App() {
             <View style={{flexDirection: "row", padding: 10, marginTop: textInputFocus ? 50: 0 }}>
             <View style={{flex: 2, alignItems:"center"}}><Text>Previous</Text></View>
             <View style={{flex: 2, alignItems:"center"}}><Button title="List"/></View>
-            <View style={{flex: 2, alignItems:"center"}}><Text>Skip</Text></View>
+            <View style={{flex: 2, alignItems:"center"}}><Button title="Skip" onPress={skipLocus}/></View>
         </View>
 
 <View style={{ flexDirection:"row", padding: 10, justifyContent: "space-around", marginTop: 30, marginBottom: 10}}>
