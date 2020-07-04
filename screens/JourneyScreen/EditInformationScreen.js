@@ -39,7 +39,6 @@ function Item({ id, value, editItem, isFocused, pressEnter, style }) {
 function EditInformationScreen({ lociStore, setLociStore }) {
   const [loci, setLoci] = useState(lociStore);
 
-  console.log("Store", lociStore);
   useEffect(() => {
     setLoci(lociStore);
   }, [lociStore]);
@@ -47,11 +46,10 @@ function EditInformationScreen({ lociStore, setLociStore }) {
   let isEmpty = loci.length === 0;
 
   const setItems = (loci) => {
-    console.log(loci);
     setLoci(loci);
     setLociStore(loci);
   };
-  //const [items, setItems] = useState([""]);
+
   const [focused, setFocused] = useState(0);
 
   const editItem = (i, value) => {

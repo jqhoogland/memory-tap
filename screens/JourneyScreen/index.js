@@ -12,7 +12,7 @@ export default function JourneyScreen() {
   return (
     <Stack.Navigator>
       <Stack.Screen name="Overview" component={OverviewScreen} />
-      <Stack.Screen name="Edit Locations" component={EditLocationsScreen} />
+      <Stack.Screen name="Edit Loci" component={EditLocationsScreen} />
       <Stack.Screen name="Edit Information" component={EditInformationScreen} />
     </Stack.Navigator>
   );

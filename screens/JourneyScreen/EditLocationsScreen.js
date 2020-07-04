@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+
+import { connect } from "react-redux";
 import {
   ScrollView,
   Text,
@@ -15,6 +17,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
+
+import { setLoci } from "../../store/actions";
+import { getActiveJourney } from "../../utils";
 
 const getLatLng = (coords) => ({
   latitude: coords.latitude,
@@ -39,13 +44,24 @@ function Item({ id, title, onPress }) {
   );
 }
 
-export default function EditJourneyScreen() {
-  const [location, setLocation] = useState(null);
+function EditLocationsScreen({ lociStore, setLociStore }) {
+  const [loci, setLoci] = useState(lociStore);
+
+  useEffect(() => {
+    setLoci(lociStore);
+  }, [lociStore]);
+
+  let isEmpty = loci.length === 0;
+
+  const updateLoci = (loci) => {
+    setLoci(loci);
+    setLociStore(loci);
+  };
+
+  const [userLocation, setUserLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [followsUserLocation, setFollowsUserLocation] = useState(true);
-  const [listToLearn, setListToLearn] = useState(LIST);
-  const [markers, setMarkers] = useState(initMarkers(LIST));
-  const [currentMarker, setCurrentMarker] = useState(LIST[0].name);
+  const [currentMarker, setCurrentMarker] = useState(loci[0].name);
   const [currentMarkerIndex, setCurrentMarkerIndex] = useState(0);
   const [textInputFocus, setTextInputFocus] = useState(false);
   const [showListModal, setShowListModal] = useState(false);
@@ -62,15 +78,17 @@ export default function EditJourneyScreen() {
       // }
 
       let newLocation = await Location.getCurrentPositionAsync({});
-      setLocation(newLocation);
+      setUserLocation(newLocation);
     })();
   }, []);
 
   const onDoublePress = (e) => {
     e.preventDefault();
     const { coordinate, position } = e.nativeEvent;
-    let delta_x = Math.abs(coordinate.latitude - location.coords.latitude);
-    let delta_y = Math.abs(coordinate.longitude - location.coords.longitude);
+    let delta_x = Math.abs(coordinate.latitude - userLocation.coords.latitude);
+    let delta_y = Math.abs(
+      coordinate.longitude - userLocation.coords.longitude
+    );
 
     if (delta_x < 0.00001 && delta_y < 0.00001) {
       setFollowsUserLocation(true);
@@ -79,10 +97,10 @@ export default function EditJourneyScreen() {
 
   const moveTo = async (i) => {
     setShowListModal(false);
-    if (i >= markers.length) {
+    if (i >= loci.length) {
       setCurrentMarker(`Locus ${i + 1}`);
     } else {
-      setCurrentMarker(markers[i].name);
+      setCurrentMarker(loci[i].name);
     }
 
     setCurrentMarkerIndex(i);
@@ -91,37 +109,42 @@ export default function EditJourneyScreen() {
   const backLocus = async () => moveTo(currentMarkerIndex - 1);
 
   const updateLocusName = async (value) => {
-    if (currentMarkerIndex < markers.length) {
-      let newMarkers = [...markers];
-      newMarkers[currentMarkerIndex].name = value;
-      setMarkers(newMarkers);
+    if (currentMarkerIndex < loci.length) {
+      let newLoci = [...loci];
+      newLoci[currentMarkerIndex].name = value;
+      updateLoci(newLoci);
     }
 
     setCurrentMarker(value);
   };
 
   const addLocus = async () => {
-    let location = await Location.getCurrentPositionAsync();
-    let newMarkers = await [...markers];
+    let userLocation = await Location.getCurrentPositionAsync();
+    let newLoci = await [...loci];
 
-    if (currentMarkerIndex === markers.length) {
-      await newMarkers.push({ name: null, location: null });
+    if (currentMarkerIndex === loci.length) {
+      // TODO: FIX to coords
+      await newLoci.push({
+        name: null,
+        id: newLoci.length,
+        coords: null,
+      });
     }
 
-    newMarkers[currentMarkerIndex].name = currentMarker;
-    newMarkers[currentMarkerIndex].location = location;
+    newLoci[currentMarkerIndex].name = currentMarker;
+    newLoci[currentMarkerIndex].coords = userLocation.coords;
 
-    await setMarkers(newMarkers);
+    await updateLoci(newLoci);
 
     moveTo(currentMarkerIndex + 1);
   };
 
   const insert = async (i) => {
-    let location = await Location.getCurrentPositionAsync();
-    let newMarkers = await [...markers];
+    let userLocation = await Location.getCurrentPositionAsync();
+    let newLoci = await [...loci];
     const name = `Locus ${i + 1}`;
-    newMarkers.splice(i, 0, { name, location });
-    await setMarkers(newMarkers);
+    newLoci.splice(i, 0, { name, coords: userLocation.coords });
+    await updateLoci(newLoci);
 
     setCurrentMarker(name);
     setCurrentMarkerIndex(i);
@@ -130,15 +153,15 @@ export default function EditJourneyScreen() {
   const insertAfter = async () => insert(currentMarkerIndex + 1);
 
   const deleteLocus = () => {
-    let newMarkers = [...markers];
-    newMarkers.splice(currentMarkerIndex, 1);
-    setMarkers(newMarkers);
+    let newLoci = [...loci];
+    newLoci.splice(currentMarkerIndex, 1);
+    updateLoci(newLoci);
 
-    if (currentMarkerIndex >= newMarkers.length) {
-      setCurrentMarkerIndex(newMarkers.length);
+    if (currentMarkerIndex >= newLoci.length) {
+      setCurrentMarkerIndex(newLoci.length);
       setCurrentMarker(`Locus ${currentMarkerIndex}`);
     } else {
-      setCurrentMarker(newMarkers[currentMarkerIndex].name);
+      setCurrentMarker(newLoci[currentMarkerIndex].name);
     }
   };
   const deleteLocusAlert = async () => {
@@ -157,12 +180,12 @@ export default function EditJourneyScreen() {
   };
 
   const dragMarker = (coordinate, i) => {
-    let newMarkers = [...markers];
-    newMarkers[i].location.coords = {
-      ...newMarkers[i].location.coords,
+    let newLoci = [...loci];
+    newLoci[i].coords = {
+      ...newLoci[i].coords,
       ...coordinate,
     };
-    setMarkers(newMarkers);
+    updateLoci(newLoci);
   };
 
   const showList = () => setShowListModal(true);
@@ -171,20 +194,18 @@ export default function EditJourneyScreen() {
   let latlng = { latitude: 0, longitude: 0 };
   if (errorMsg) {
     text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-    latlng = getLatLng(location.coords);
+  } else if (userLocation) {
+    latlng = getLatLng(userLocation.coords);
   }
-  let isBeforeEndOfList = currentMarkerIndex < markers.length;
-  let isLocated =
-    isBeforeEndOfList && markers[currentMarkerIndex].location !== null;
+  let isBeforeEndOfList = currentMarkerIndex < loci.length;
+  let isLocated = isBeforeEndOfList && loci[currentMarkerIndex].coords !== null;
 
   return (
     <ScrollView style={styles.container}>
       <Modal animationType={"slide"} transparent={true} visible={showListModal}>
         <View style={styles.modal}>
           <FlatList
-            data={markers}
+            data={loci}
             renderItem={({ item, index }) => (
               <Item
                 id={index}
@@ -208,7 +229,7 @@ export default function EditJourneyScreen() {
           showsUserLocation={true}
           showsMyLocationButton={true}
           onUserLocationChange={({ coordinate }) =>
-            setLocation({ coords: { ...coordinate } })
+            setUserLocation({ coords: { ...coordinate } })
           }
           onPanDrag={() => setFollowsUserLocation(false)}
           onDoublePress={onDoublePress}
@@ -218,12 +239,12 @@ export default function EditJourneyScreen() {
             height: textInputFocus ? 0 : Dimensions.get("window").height / 2,
           }}
         >
-          {markers.map((marker, i) =>
-            marker.location ? (
+          {loci.map((marker, i) =>
+            marker.coords ? (
               <Marker
                 pinColor={i === currentMarkerIndex ? "red" : "#ff9999"}
                 key={`key${i}`}
-                coordinate={marker.location.coords}
+                coordinate={marker.coords}
                 title={marker.name}
                 onDrag={(e) => dragMarker(e.nativeEvent.coordinate, i)}
                 onPress={() => moveTo(i)}
@@ -234,9 +255,9 @@ export default function EditJourneyScreen() {
             )
           )}
           <Polyline
-            coordinates={markers
-              .filter((markers) => markers.location)
-              .map((markers) => markers.location.coords)}
+            coordinates={loci
+              .filter((locus) => locus.coords)
+              .map((locus) => locus.coords)}
             strokeWidth={6}
           />
         </MapView>
@@ -260,7 +281,7 @@ export default function EditJourneyScreen() {
           <Button title="List" onPress={showList} />
         </View>
         <View style={{ flex: 2, alignItems: "center" }}>
-          {currentMarkerIndex < markers.length ? (
+          {currentMarkerIndex < loci.length ? (
             <Button title={isLocated ? "Next" : "Skip"} onPress={nextLocus} />
           ) : (
             <></>
@@ -277,7 +298,7 @@ export default function EditJourneyScreen() {
           marginBottom: 10,
         }}
       >
-        {currentMarkerIndex >= markers.length ? (
+        {currentMarkerIndex >= loci.length ? (
           <Text style={{ fontSize: 16, alignItems: "center" }}>
             You finished your list
           </Text>
@@ -288,7 +309,7 @@ export default function EditJourneyScreen() {
       <View style={{ marginTop: 10 }}>
         <Button
           title={
-            currentMarkerIndex < markers.length
+            currentMarkerIndex < loci.length
               ? isLocated
                 ? "Update locus"
                 : "Add locus"
@@ -339,6 +360,17 @@ export default function EditJourneyScreen() {
     </ScrollView>
   );
 }
+
+const mapStateToProps = (state) => ({
+  lociStore: getActiveJourney(state.journeys, state.selJourney).loci,
+});
+
+const mapDispatchToProps = { setLociStore: setLoci };
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(EditLocationsScreen);
 
 const styles = StyleSheet.create({
   container: {
