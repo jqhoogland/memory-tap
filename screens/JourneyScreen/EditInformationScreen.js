@@ -12,7 +12,8 @@ import {
 
 import { Input } from "react-native-elements";
 
-import { newLocus, updateLocus } from "../../store/actions";
+import { setLoci } from "../../store/actions";
+import { getActiveJourney } from "../../utils";
 
 function Item({ id, value, editItem, isFocused, pressEnter, style }) {
   const [ref, setRef] = useState(null);
@@ -35,36 +36,49 @@ function Item({ id, value, editItem, isFocused, pressEnter, style }) {
   );
 }
 
-function EditInformationScreen({ journeys, newLocus, updateLocus }) {
-  const [items, setItems] = useState([""]);
+function EditInformationScreen({ lociStore, setLociStore }) {
+  const [loci, setLoci] = useState(lociStore);
+
+  console.log("Store", lociStore);
+  useEffect(() => {
+    setLoci(lociStore);
+  }, [lociStore]);
+
+  let isEmpty = loci.length === 0;
+
+  const setItems = (loci) => {
+    console.log(loci);
+    setLoci(loci);
+    setLociStore(loci);
+  };
+  //const [items, setItems] = useState([""]);
   const [focused, setFocused] = useState(0);
 
   const editItem = (i, value) => {
-    let newItems = [...items];
-    newItems[i] = value;
+    let newItems = [...loci];
+    newItems[i].name = value;
     setItems(newItems);
   };
 
   const selectItem = () => {};
 
   const newItem = () => {
-    setItems([...items, ""]);
-    selectItem(items.length - 1);
-    setFocused(items.length - 1);
+    setItems([...loci, { name: "", id: loci.length, coords: null }]);
+    selectItem(loci.length - 1);
+    setFocused(loci.length - 1);
   };
 
   const removeItem = (i) => {
-    let newItems = [...items];
+    let newItems = [...loci];
     newItems.splice(i, 1);
-    console.log(items, newItems);
     setItems(newItems);
   };
 
   const pressEnter = (i) => {
-    if (items[i] === "") {
+    if (loci[i].name === "") {
       removeItem(i);
       setFocused(-1);
-    } else if (i < items.length - 1) {
+    } else if (i < loci.length - 1) {
       setFocused(i + 1);
     } else {
       newItem();
@@ -75,11 +89,11 @@ function EditInformationScreen({ journeys, newLocus, updateLocus }) {
   return (
     <View style={styles.container}>
       <FlatList
-        data={items}
+        data={loci}
         renderItem={({ item, index }) => (
           <Item
             id={index}
-            value={item}
+            value={item.name}
             editItem={editItem}
             isFocused={index === focused}
             pressEnter={pressEnter}
@@ -94,8 +108,11 @@ function EditInformationScreen({ journeys, newLocus, updateLocus }) {
   );
 }
 
-const mapStateToProps = (state) => ({ journeys: state.journeys });
-const mapDispatchToProps = { newLocus, updateLocus };
+const mapStateToProps = (state) => ({
+  lociStore: getActiveJourney(state.journeys, state.selJourney).loci,
+});
+
+const mapDispatchToProps = { setLociStore: setLoci };
 
 export default connect(
   mapStateToProps,

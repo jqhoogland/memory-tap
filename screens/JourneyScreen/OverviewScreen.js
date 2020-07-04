@@ -15,26 +15,23 @@ import MapView, { Marker, Polyline } from "react-native-maps";
 import { Input } from "react-native-elements";
 
 import { selectJourney, updateJourneyName } from "../../store/actions";
+import { getActiveJourney } from "../../utils";
 
 const MARKERS = require("./demo.json");
 
 const getInitRegion = (markers) => {
-  const markersLocated = markers.filter(
-    (marker) => marker.location && marker.location.coords
-  );
+  const markersLocated = markers.filter((marker) => marker.coords);
   const latOrdering = markersLocated.sort(
-    (a, b) => a.location.coords.latitude < b.location.coords.latitude
+    (a, b) => a.coords.latitude < b.coords.latitude
   );
   const lngOrdering = markersLocated.sort(
-    (a, b) => a.location.coords.longitude < b.location.coords.longitude
+    (a, b) => a.coords.longitude < b.coords.longitude
   );
 
-  const minLatitude = latOrdering[0].location.coords.latitude;
-  const maxLatitude =
-    latOrdering[latOrdering.length - 1].location.coords.latitude;
-  const minLongitude = lngOrdering[0].location.coords.longitude;
-  const maxLongitude =
-    lngOrdering[lngOrdering.length - 1].location.coords.longitude;
+  const minLatitude = latOrdering[0].coords.latitude;
+  const maxLatitude = latOrdering[latOrdering.length - 1].coords.latitude;
+  const minLongitude = lngOrdering[0].coords.longitude;
+  const maxLongitude = lngOrdering[lngOrdering.length - 1].coords.longitude;
 
   const padding = 0.4;
   const latitudeDelta = Math.abs(minLatitude - maxLatitude) * (1 + padding);
@@ -63,8 +60,8 @@ function OverviewScreen({
     setJourney(journeyStore);
   }, [journeyStore]);
 
-  let isEmpty = journey.locations.length === 0;
-  let initRegion = isEmpty ? {} : getInitRegion(journey.locations);
+  let isEmpty = journey.loci.filter((locus) => locus.coords).length === 0;
+  let initRegion = isEmpty ? {} : getInitRegion(journey.loci);
 
   const updateJourneyName = (value) => {
     updateJourneyNameStore(value);
@@ -81,17 +78,17 @@ function OverviewScreen({
             height: Dimensions.get("window").height / 3,
           }}
         >
-          {journey.locations.map((marker, i) =>
-            marker.location ? (
-              <Marker key={`key${i}`} coordinate={marker.location.coords} />
+          {journey.loci.map((marker, i) =>
+            marker.coords ? (
+              <Marker key={`key${i}`} coordinate={marker.coords} />
             ) : (
               <></>
             )
           )}
           <Polyline
-            coordinates={journey.locations
-              .filter((marker) => marker.location)
-              .map((marker) => marker.location.coords)}
+            coordinates={journey.loci
+              .filter((marker) => marker.coords)
+              .map((marker) => marker.coords)}
             strokeWidth={6}
           />
         </MapView>
@@ -109,25 +106,13 @@ function OverviewScreen({
         />
 
         <Button
-          title={isEmpty ? "Add Locations" : "Edit Locations"}
-          onPress={() => navigation.navigate("Edit Locations")}
+          title={isEmpty ? "Add Loci" : "Edit Loci"}
+          onPress={() => navigation.navigate("Edit Loci")}
         />
       </View>
     </ScrollView>
   );
 }
-
-const getActiveJourney = (journeys, journeyId) => {
-  const journeyIndex = journeys.findIndex(
-    (journey) => journey.id === journeyId
-  );
-
-  if (journeyIndex >= journeyId) {
-    return journeys[journeyIndex];
-  } else {
-    return journeys[journeys.length - 1];
-  }
-};
 
 const mapStateToProps = (state) => ({
   journeyStore: getActiveJourney(state.journeys, state.selJourney),

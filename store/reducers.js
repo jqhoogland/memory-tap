@@ -2,11 +2,11 @@ import {
   SELECT_JOURNEY,
   NEW_JOURNEY,
   UPDATE_JOURNEY_NAME,
-  NEW_LOCUS,
-  UPDATE_LOCUS,
+  SET_LOCI,
 } from "./actions";
 
 const initialState = { selJourney: 0, journeys: [] };
+const blankLocus = { name: "", id: 0, coords: null };
 
 export default function rootReducer(state = initialState, action) {
   let newJourneys = [...state.journeys];
@@ -19,14 +19,9 @@ export default function rootReducer(state = initialState, action) {
       ? newJourneys[journeyIndex]
       : null;
 
-  console.log(
-    state.journeys.length,
-    newJourneys.length,
-    selJourney,
-    journeyIndex,
-    journey
-  );
+  console.log("Reducing", action, state);
 
+  //return initialState;
   switch (action.type) {
     case SELECT_JOURNEY:
       return {
@@ -38,23 +33,25 @@ export default function rootReducer(state = initialState, action) {
         selJourney: state.journeys.length,
         journeys: [
           ...state.journeys,
-          { name: "New Journey", id: state.journeys.length, locations: [] },
+          {
+            name: "New Journey",
+            id: state.journeys.length,
+            loci: [blankLocus],
+          },
         ],
       };
 
     case UPDATE_JOURNEY_NAME:
-      console.log(newJourneys[journeyIndex]);
       journey.name = action.name;
       newJourneys[journeyIndex] = journey;
-      console.log(newJourneys[journeyIndex]);
 
       return {
         selJourney,
         journeys: newJourneys,
       };
 
-    case NEW_LOCUS:
-      journey.locations.push({ name: action.name, location: action.location });
+    case SET_LOCI:
+      journey.loci = action.loci ? action.loci : [];
       newJourneys[journeyIndex] = journey;
 
       return {
@@ -62,18 +59,6 @@ export default function rootReducer(state = initialState, action) {
         journeys: newJourneys,
       };
 
-    case UPDATE_LOCUS:
-      console.log(newJourneys[journeyIndex]);
-      journey.locations[action.index] = {
-        name: action.name,
-        location: action.location,
-      };
-      newJourneys[journeyIndex] = journey;
-
-      return {
-        selJourney,
-        journeys: newJourneys,
-      };
     default:
       return state;
   }
