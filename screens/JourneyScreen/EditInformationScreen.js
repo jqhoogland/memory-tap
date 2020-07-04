@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+
+import { connect } from "react-redux";
 import {
   Text,
   View,
@@ -9,6 +11,8 @@ import {
 } from "react-native";
 
 import { Input } from "react-native-elements";
+
+import { newLocus, updateLocus } from "../../store/actions";
 
 function Item({ id, value, editItem, isFocused, pressEnter, style }) {
   const [ref, setRef] = useState(null);
@@ -31,7 +35,7 @@ function Item({ id, value, editItem, isFocused, pressEnter, style }) {
   );
 }
 
-export default function HomeScreen() {
+function EditInformationScreen({ journeys, newLocus, updateLocus }) {
   const [items, setItems] = useState([""]);
   const [focused, setFocused] = useState(0);
 
@@ -89,6 +93,14 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+const mapStateToProps = (state) => ({ journeys: state.journeys });
+const mapDispatchToProps = { newLocus, updateLocus };
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(EditInformationScreen);
 
 const styles = StyleSheet.create({
   container: {
