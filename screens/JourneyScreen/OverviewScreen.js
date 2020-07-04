@@ -62,8 +62,9 @@ function OverviewScreen({
   const [journey, setJourney] = useState(journeyStore);
 
   useEffect(() => {
+    console.log("Updating journey", journeyStore.selJourney);
     setJourney(journeyStore);
-  }, [journeyStore]);
+  });
 
   let isEmpty = journey.loci.filter((locus) => locus.coords).length === 0;
   let initRegion = isEmpty ? {} : getInitRegion(journey.loci);
@@ -124,6 +125,11 @@ function OverviewScreen({
           value={journey.name}
           onChangeText={updateJourneyName}
         />
+
+        <Text>
+          Journey contains {journey.loci ? journey.loci.length : 0} loci.
+        </Text>
+        <Text style={{ fontSize: 10 }}>ID: {journey.id}</Text>
 
         <Button
           title={isEmpty ? "Add Information" : "Edit Information"}

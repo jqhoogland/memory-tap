@@ -19,11 +19,15 @@ function useInterval(callback, delay) {
 }
 
 export const getActiveJourney = (journeys, journeyId) => {
+  console.log(
+    journeyId,
+    journeys.map((journeys) => journeys.id)
+  );
   const journeyIndex = journeys.findIndex(
     (journey) => journey.id === journeyId
   );
 
-  if (journeyIndex >= journeyId) {
+  if (journeyIndex >= 0) {
     return journeys[journeyIndex];
   } else {
     return journeys[journeys.length - 1];
