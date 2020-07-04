@@ -14,7 +14,11 @@ import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Input } from "react-native-elements";
 
-import { selectJourney, updateJourneyName } from "../../store/actions";
+import {
+  selectJourney,
+  updateJourneyName,
+  deleteJourney,
+} from "../../store/actions";
 import { getActiveJourney } from "../../utils";
 
 const MARKERS = require("./demo.json");
@@ -51,6 +55,7 @@ const getInitRegion = (markers) => {
 function OverviewScreen({
   journeyStore,
   updateJourneyNameStore,
+  deleteJourney,
   navigation,
   route,
 }) {
@@ -66,6 +71,26 @@ function OverviewScreen({
   const updateJourneyName = (value) => {
     updateJourneyNameStore(value);
     setJourney({ ...journey, name: value });
+  };
+  const deleteJourneyAlert = () => {
+    Alert.alert(
+      "Delete Journey",
+      `Are you sure you want to delete journey '${journey.name}'`,
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => {
+            deleteJourney();
+            navigation.navigate("Home");
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -109,6 +134,8 @@ function OverviewScreen({
           title={isEmpty ? "Add Loci" : "Edit Loci"}
           onPress={() => navigation.navigate("Edit Loci")}
         />
+
+        <Button title="Delete Journey" onPress={deleteJourneyAlert} />
       </View>
     </ScrollView>
   );
@@ -120,6 +147,7 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = {
   updateJourneyNameStore: updateJourneyName,
+  deleteJourney,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewScreen);

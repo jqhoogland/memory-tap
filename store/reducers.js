@@ -3,25 +3,34 @@ import {
   NEW_JOURNEY,
   UPDATE_JOURNEY_NAME,
   SET_LOCI,
+  DELETE_JOURNEY,
 } from "./actions";
+
+import { uuidv4 } from "../utils";
 
 const initialState = { selJourney: 0, journeys: [] };
 const blankLocus = { name: "", id: 0, coords: null };
 
 export default function rootReducer(state = initialState, action) {
   let newJourneys = [...state.journeys];
-  let selJourney = state.selJourney ? state.selJourney : 0;
+  let selJourney = state.selJourney ? state.selJourney : null;
   let journeyIndex = newJourneys.findIndex(
     (journey) => journey.id === selJourney
   );
-  let journey =
-    newJourneys.length !== 0 && journeyIndex >= 0
-      ? newJourneys[journeyIndex]
-      : null;
+  let journey;
+
+  if (newJourneys.length !== 0) {
+    if (journeyIndex && journeyIndex >= 0) {
+      journey = newJourneys[journeyIndex];
+    } else {
+      selJourney = newJourneys[0].id;
+      journeyIndex = 0;
+      journey = newJourneys[0];
+    }
+  }
 
   console.log("Reducing", action, state);
 
-  //return initialState;
   switch (action.type) {
     case SELECT_JOURNEY:
       return {
@@ -35,7 +44,7 @@ export default function rootReducer(state = initialState, action) {
           ...state.journeys,
           {
             name: "New Journey",
-            id: state.journeys.length,
+            id: uuidv4(),
             loci: [blankLocus],
           },
         ],
@@ -56,6 +65,16 @@ export default function rootReducer(state = initialState, action) {
 
       return {
         selJourney,
+        journeys: newJourneys,
+      };
+
+    case DELETE_JOURNEY:
+      if (state.selJourney) {
+        newJourneys.splice(state.selJourney, 1);
+      }
+
+      return {
+        selJourney: newJourneys.length > 0 ? newJourneys[0].id : 0,
         journeys: newJourneys,
       };
 
