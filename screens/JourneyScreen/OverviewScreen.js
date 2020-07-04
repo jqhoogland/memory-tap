@@ -14,7 +14,7 @@ import * as Location from "expo-location";
 import MapView, { Marker, Polyline } from "react-native-maps";
 import { Input } from "react-native-elements";
 
-import { updateJourneyName } from "../../store/actions";
+import { selectJourney, updateJourneyName } from "../../store/actions";
 
 const MARKERS = require("./demo.json");
 
@@ -51,24 +51,25 @@ const getInitRegion = (markers) => {
   };
 };
 
-function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
-  const [journey, setJourney] = useState({
-    name: "",
-    id: journeys.length - 1,
-    locations: [],
-  });
-
-  const { journeyId } = route.params
-    ? route.params
-    : { journeyId: journeys.length - 1 };
+function OverviewScreen({
+  journeyStore,
+  updateJourneyNameStore,
+  navigation,
+  route,
+}) {
+  const [journey, setJourney] = useState(journeyStore);
 
   useEffect(() => {
-    console.log(route.params, journeyId, journeys.length);
-    setJourney(journeys.find((journey) => journey.id === journeyId));
-  }, [journeys, route]);
+    setJourney(journeyStore);
+  }, [journeyStore]);
 
   let isEmpty = journey.locations.length === 0;
   let initRegion = isEmpty ? {} : getInitRegion(journey.locations);
+
+  const updateJourneyName = (value) => {
+    updateJourneyNameStore(value);
+    setJourney({ ...journey, name: value });
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -99,7 +100,7 @@ function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
         <Input
           label="Journey title"
           value={journey.name}
-          onChangeText={(value) => updateJourneyName(value, journey.id)}
+          onChangeText={updateJourneyName}
         />
 
         <Button
@@ -116,12 +117,24 @@ function OverviewScreen({ journeys, updateJourneyName, navigation, route }) {
   );
 }
 
+const getActiveJourney = (journeys, journeyId) => {
+  const journeyIndex = journeys.findIndex(
+    (journey) => journey.id === journeyId
+  );
+
+  if (journeyIndex >= journeyId) {
+    return journeys[journeyIndex];
+  } else {
+    return journeys[journeys.length - 1];
+  }
+};
+
 const mapStateToProps = (state) => ({
-  journeys: state.journeys,
+  journeyStore: getActiveJourney(state.journeys, state.selJourney),
 });
 
 const mapDispatchToProps = {
-  updateJourneyName,
+  updateJourneyNameStore: updateJourneyName,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(OverviewScreen);

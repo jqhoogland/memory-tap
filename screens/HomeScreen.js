@@ -10,7 +10,7 @@ import {
   Button,
 } from "react-native";
 
-import { newJourney } from "../store/actions";
+import { selectJourney, newJourney } from "../store/actions";
 
 function Item({ id, title, onPress }) {
   return (
@@ -20,12 +20,19 @@ function Item({ id, title, onPress }) {
   );
 }
 
-const HomeScreen = ({ journeys, newJourney, navigation }) => {
+const HomeScreen = ({ journeys, selectJourney, newJourney, navigation }) => {
   const createJourney = () => {
     newJourney();
     navigation.navigate("Journey", {
       screen: "Overview",
-      params: { journeyId: journeys.length },
+    });
+  };
+
+  const goToJourney = (id) => {
+    selectJourney(id);
+
+    navigation.navigate("Journey", {
+      screen: "Overview",
     });
   };
 
@@ -37,15 +44,10 @@ const HomeScreen = ({ journeys, newJourney, navigation }) => {
           <Item
             id={item.id}
             title={item.name}
-            onPress={() =>
-              navigation.navigate("Journey", {
-                screen: "Overview",
-                params: { journeyId: item.id },
-              })
-            }
+            onPress={() => goToJourney(item.id)}
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `key${item.id}`}
       />
       <View style={{ margin: 20 }}>
         <Button title="New Journey" onPress={createJourney} />
@@ -59,6 +61,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = {
+  selectJourney,
   newJourney,
 };
 
