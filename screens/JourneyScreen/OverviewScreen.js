@@ -66,6 +66,10 @@ function OverviewScreen({
     setJourney(journeyStore);
   }, [journeyStore]);
 
+  let numNamedLoci = journey.loci
+    ? journey.loci.filter((locus) => locus.name).length
+    : 0;
+
   let isEmpty = !(
     journey.loci &&
     journey.loci.filter((locus) => locus.coords && locus.coords.latitude)
@@ -136,9 +140,7 @@ function OverviewScreen({
               onChangeText={updateJourneyName}
             />
 
-            <Text>
-              Journey contains {journey.loci ? journey.loci.length : 0} loci.
-            </Text>
+            <Text>Journey contains {numNamedLoci} loci.</Text>
             <Text style={{ fontSize: 10 }}>ID: {journey.id}</Text>
 
             <Button
