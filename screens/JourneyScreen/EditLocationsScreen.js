@@ -118,25 +118,34 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
     setCurrentMarker(value);
   };
 
-  const addLocus = async () => {
-    let userLocation = await Location.getCurrentPositionAsync();
-    let newLoci = await [...loci];
+  const addLocusFromCoords = (location) => {
+    let newLoci = [...loci];
 
     if (currentMarkerIndex === loci.length) {
       // TODO: FIX to coords
-      await newLoci.push({
+      newLoci.push({
         name: null,
         id: newLoci.length,
         coords: null,
       });
     }
 
-    newLoci[currentMarkerIndex].name = currentMarker;
-    newLoci[currentMarkerIndex].coords = userLocation.coords;
+    newLoci[currentMarkerIndex].name = currentMarker
+      ? currentMarker
+      : `Locus ${loci.length + 1}`;
+    newLoci[currentMarkerIndex].coords = location;
 
-    await updateLoci(newLoci);
-
+    updateLoci(newLoci);
     moveTo(currentMarkerIndex + 1);
+  };
+
+  const addLocus = async () => {
+    let userLocation = await Location.getCurrentPositionAsync();
+    addLocusFromCoords(userLocation.coords);
+  };
+
+  const longPressAddLocus = (e) => {
+    const newLength = addLocusFromCoords({ ...e.nativeEvent.coordinate });
   };
 
   const insert = async (i) => {
@@ -234,6 +243,7 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
           onPanDrag={() => setFollowsUserLocation(false)}
           onDoublePress={onDoublePress}
           followsUserLocation={followsUserLocation}
+          onLongPress={longPressAddLocus}
           style={{
             width: Dimensions.get("window").width,
             height: textInputFocus ? 0 : Dimensions.get("window").height / 2,
@@ -292,10 +302,8 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
       <View
         style={{
           flexDirection: "row",
-          padding: 10,
+          padding: 5,
           justifyContent: "space-around",
-          marginTop: 10,
-          marginBottom: 10,
         }}
       >
         {currentMarkerIndex >= loci.length ? (
@@ -306,7 +314,7 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
           <></>
         )}
       </View>
-      <View style={{ marginTop: 10 }}>
+      <View style={{ marginTop: 5 }}>
         <Button
           title={
             currentMarkerIndex < loci.length
@@ -324,7 +332,6 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
           flexDirection: "row",
           padding: 10,
           justifyContent: "space-around",
-          marginTop: 30,
         }}
       >
         <TextInput
@@ -337,7 +344,7 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
       </View>
 
       {isLocated ? (
-        <View style={{ flexDirection: "row", paddingTop: 20 }}>
+        <View style={{ flexDirection: "row", paddingTop: 5 }}>
           <View style={{ flex: 3 }}>
             <Button title="Insert Before" onPress={insertBefore} />
           </View>
@@ -350,7 +357,7 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
       )}
       {isBeforeEndOfList ? (
         <Button
-          style={{ marginTop: 30 }}
+          style={{ marginTop: 10 }}
           title="Delete"
           onPress={deleteLocusAlert}
         />

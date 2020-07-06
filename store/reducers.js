@@ -9,7 +9,7 @@ import {
 import { uuidv4 } from "../utils";
 
 const initialState = { selJourney: 0, journeys: [] };
-const blankLocus = { name: "", id: 0, coords: null };
+const blankLocus = { name: "Locus 1", id: 0, coords: null };
 
 export default function rootReducer(state = initialState, action) {
   let newJourneys = [...state.journeys];
@@ -29,7 +29,7 @@ export default function rootReducer(state = initialState, action) {
     }
   }
 
-  console.log("Reducing", action, state);
+  //console.log("Reducing", action, state);
 
   //return initialState;
 
