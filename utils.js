@@ -26,12 +26,12 @@ export const getActiveJourney = (journeys, journeyId) => {
   const journeyIndex = journeys.findIndex(
     (journey) => journey.id === journeyId
   );
-
-  if (journeyIndex >= 0) {
-    return journeys[journeyIndex];
-  } else {
-    return journeys[journeys.length - 1];
+  if (journeyIndex < 0) {
+    console.log("could not find", journeys, journeyId);
+    return { name: "New Journey", id: "", loci: [] };
   }
+
+  return { ...journeys[journeyIndex] }; // Return a copy otherwise react elements won't recognize it as changed
 };
 
 export const uuidv4 = () =>

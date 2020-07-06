@@ -31,6 +31,8 @@ export default function rootReducer(state = initialState, action) {
 
   console.log("Reducing", action, state);
 
+  //return initialState;
+
   switch (action.type) {
     case SELECT_JOURNEY:
       return {
@@ -38,13 +40,14 @@ export default function rootReducer(state = initialState, action) {
         journeys: newJourneys,
       };
     case NEW_JOURNEY:
+      const id = uuidv4();
       return {
-        selJourney: state.journeys.length,
+        selJourney: id,
         journeys: [
           ...state.journeys,
           {
             name: "New Journey",
-            id: uuidv4(),
+            id,
             loci: [blankLocus],
           },
         ],
@@ -70,11 +73,12 @@ export default function rootReducer(state = initialState, action) {
 
     case DELETE_JOURNEY:
       if (state.selJourney) {
-        newJourneys.splice(state.selJourney, 1);
+        newJourneys.splice(journeyIndex, 1);
       }
 
       return {
-        selJourney: newJourneys.length > 0 ? newJourneys[0].id : 0,
+        selJourney:
+          newJourneys.length > 0 ? newJourneys[newJourneys.length - 1].id : 0,
         journeys: newJourneys,
       };
 

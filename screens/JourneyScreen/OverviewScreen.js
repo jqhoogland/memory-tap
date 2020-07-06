@@ -62,11 +62,15 @@ function OverviewScreen({
   const [journey, setJourney] = useState(journeyStore);
 
   useEffect(() => {
-    console.log("Updating journey", journeyStore.selJourney);
+    console.log("Updating journey", journeyStore);
     setJourney(journeyStore);
-  });
+  }, [journeyStore]);
 
-  let isEmpty = journey.loci.filter((locus) => locus.coords).length === 0;
+  let isEmpty = !(
+    journey.loci &&
+    journey.loci.filter((locus) => locus.coords && locus.coords.latitude)
+      .length > 0
+  );
   let initRegion = isEmpty ? {} : getInitRegion(journey.loci);
 
   const updateJourneyName = (value) => {
@@ -96,53 +100,63 @@ function OverviewScreen({
 
   return (
     <ScrollView style={styles.container}>
-      <View>
-        <MapView
-          initRegion={initRegion}
-          style={{
-            width: Dimensions.get("window").width,
-            height: Dimensions.get("window").height / 3,
-          }}
-        >
-          {journey.loci.map((marker, i) =>
-            marker.coords ? (
-              <Marker key={`key${i}`} coordinate={marker.coords} />
-            ) : (
-              <></>
-            )
-          )}
-          <Polyline
-            coordinates={journey.loci
-              .filter((marker) => marker.coords)
-              .map((marker) => marker.coords)}
-            strokeWidth={6}
-          />
-        </MapView>
-      </View>
-      <View style={{ padding: 20 }}>
-        <Input
-          label="Journey title"
-          value={journey.name}
-          onChangeText={updateJourneyName}
-        />
+      {journey && journey.loci ? (
+        <>
+          <View>
+            <MapView
+              region={initRegion}
+              style={{
+                width: Dimensions.get("window").width,
+                height: Dimensions.get("window").height / 3,
+              }}
+              zoomEnabled={false}
+              scrollEnabled={false}
+              rotateEnabled={false}
+              pitchEnabled={false}
+            >
+              {journey.loci.map((marker, i) =>
+                marker.coords ? (
+                  <Marker key={`key${i}`} coordinate={marker.coords} />
+                ) : (
+                  <></>
+                )
+              )}
+              <Polyline
+                coordinates={journey.loci
+                  .filter((marker) => marker.coords)
+                  .map((marker) => marker.coords)}
+                strokeWidth={6}
+              />
+            </MapView>
+          </View>
+          <View style={{ padding: 20 }}>
+            <Input
+              label="Journey title"
+              value={journey.name}
+              onChangeText={updateJourneyName}
+            />
 
-        <Text>
-          Journey contains {journey.loci ? journey.loci.length : 0} loci.
-        </Text>
-        <Text style={{ fontSize: 10 }}>ID: {journey.id}</Text>
+            <Text>
+              Journey contains {journey.loci ? journey.loci.length : 0} loci.
+            </Text>
+            <Text style={{ fontSize: 10 }}>ID: {journey.id}</Text>
 
-        <Button
-          title={isEmpty ? "Add Information" : "Edit Information"}
-          onPress={() => navigation.navigate("Edit Information")}
-        />
+            <Button
+              title={isEmpty ? "Add Information" : "Edit Information"}
+              onPress={() => navigation.navigate("Edit Information")}
+            />
 
-        <Button
-          title={isEmpty ? "Add Loci" : "Edit Loci"}
-          onPress={() => navigation.navigate("Edit Loci")}
-        />
+            <Button
+              title={isEmpty ? "Add Loci" : "Edit Loci"}
+              onPress={() => navigation.navigate("Edit Loci")}
+            />
 
-        <Button title="Delete Journey" onPress={deleteJourneyAlert} />
-      </View>
+            <Button title="Delete Journey" onPress={deleteJourneyAlert} />
+          </View>
+        </>
+      ) : (
+        <></>
+      )}
     </ScrollView>
   );
 }
