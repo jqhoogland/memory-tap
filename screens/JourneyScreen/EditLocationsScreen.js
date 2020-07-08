@@ -48,7 +48,7 @@ function EditLocationsScreen({ lociStore, setLociStore }) {
   const [loci, setLoci] = useState(lociStore);
 
   useEffect(() => {
-    setLoci(lociStore);
+    setLoci([...lociStore]);
   }, [lociStore]);
 
   let isEmpty = loci.length === 0;
@@ -382,6 +382,7 @@ export default connect(
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "white",
   },
   item: {
     padding: 20,

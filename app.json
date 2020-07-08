@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MemoryTap",
-    "slug": "MemoryTap",
+    "name": "Mind Locus",
+    "slug": "MindLocus",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -17,7 +17,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+        "supportsTablet": true,
+        "bundleIdentifier": "com.PlanetCurious.MemoryTap"
     },
     "web": {
       "favicon": "./assets/favicon.png"
